@@ -5,14 +5,36 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ac36251c-4415-4ac9-8fbc-5fa38ef65e7b" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pytest.ini" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/my_cookbook/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/my_cookbook/recipes/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/my_cookbook/recipes/application/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/my_cookbook/recipes/application/create_recipe.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/my_cookbook/recipes/application/create_recipe_dto.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/my_cookbook/recipes/domain/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/my_cookbook/recipes/domain/recipe.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/my_cookbook/recipes/domain/recipe_repository.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/my_cookbook/recipes/infrastructure/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/my_cookbook/recipes/tests/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/my_cookbook/recipes/tests/application/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/my_cookbook/recipes/tests/application/test_create_recipe.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/my_cookbook/recipes/tests/infrastructure/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -25,6 +47,9 @@
   "associatedIndex": 0
 }]]></component>
   <component name="ProjectId" id="38ceWdwBxzC6Ne4AyQQEcO598il" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -48,6 +73,11 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -63,21 +93,11 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1769103322284</updated>
-      <workItem from="1769103323197" duration="696000" />
+      <workItem from="1769103323197" duration="7145000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/main.py</url>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
