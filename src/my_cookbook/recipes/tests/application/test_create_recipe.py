@@ -33,6 +33,15 @@ class TestCreateRecipe:
         with pytest.raises(InvalidRecipeName):
             CreateRecipe(mock_recipe_repository).execute(create_recipe_dto)
 
+    def test_does_not_allow_to_create_a_recite_with_a_short_name(self, mock_recipe_repository) -> None:
+        create_recipe_dto = CreateRecipeDTO(
+            name="Ome",
+            description="Omelette description",
+        )
+
+        with pytest.raises(InvalidRecipeName):
+            CreateRecipe(mock_recipe_repository).execute(create_recipe_dto)
+
 
 
 
