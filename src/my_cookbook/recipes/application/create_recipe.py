@@ -16,7 +16,7 @@ class CreateRecipe:
         self._recipe_repository = recipe_repository
 
     def execute(self, create_repository_dto: CreateRecipeDTO) -> None:
-        if create_repository_dto.name == "":
+        if create_repository_dto.name == "" or len(create_repository_dto.name) <5:
             raise InvalidRecipeName("Recipe name cannot be empty")
 
         recipe = Recipe(create_repository_dto.name, create_repository_dto.description)
