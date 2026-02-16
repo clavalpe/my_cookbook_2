@@ -3,6 +3,7 @@ import pytest
 
 from my_cookbook.recipes.application.create_recipe import CreateRecipe, CreateRecipeDTO
 from my_cookbook.recipes.domain.exceptions import InvalidRecipeName
+from my_cookbook.recipes.domain.recipe import RecipeName
 from my_cookbook.recipes.domain.recipe_repository import RecipeRepository
 
 
@@ -21,7 +22,7 @@ class TestCreateRecipe:
 
         mock_recipe_repository.save.assert_called_once()
         recipe = mock_recipe_repository.save.call_args[0][0]
-        assert recipe.name == "Omelette"
+        assert recipe.name == RecipeName("Omelette")
         assert recipe.description == "Omelette description"
 
     def test_does_not_allow_to_create_an_empty_name_recipe(self, mock_recipe_repository) -> None:

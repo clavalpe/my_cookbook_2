@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 from my_cookbook.recipes.domain.exceptions import InvalidRecipeName
-from my_cookbook.recipes.domain.recipe import Recipe
+from my_cookbook.recipes.domain.recipe import Recipe, RecipeName
 from my_cookbook.recipes.domain.recipe_repository import RecipeRepository
 
 
@@ -16,10 +16,9 @@ class CreateRecipe:
         self._recipe_repository = recipe_repository
 
     def execute(self, create_repository_dto: CreateRecipeDTO) -> None:
-        if create_repository_dto.name == "" or len(create_repository_dto.name) <5:
-            raise InvalidRecipeName("Recipe name cannot be empty")
+        recipe_name = RecipeName(create_repository_dto.name)
 
-        recipe = Recipe(create_repository_dto.name, create_repository_dto.description)
+        recipe = Recipe(recipe_name, create_repository_dto.description)
         self._recipe_repository.save(recipe)
 
 
