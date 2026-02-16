@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 
-from my_cookbook.recipes.domain.exceptions import InvalidRecipeName
 from my_cookbook.recipes.domain.recipe import Recipe, RecipeName
 from my_cookbook.recipes.domain.recipe_repository import RecipeRepository
 
@@ -20,5 +19,3 @@ class CreateRecipe:
 
         recipe = Recipe(recipe_name, create_repository_dto.description)
         self._recipe_repository.save(recipe)
-
-
