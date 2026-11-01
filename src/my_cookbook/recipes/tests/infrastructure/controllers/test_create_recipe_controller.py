@@ -124,7 +124,28 @@ class TestCreateRecipeController:
         )
 
         assert response.status_code == 400
-        assert response.json()["code"] == "INVALID_REQUEST"
+        assert response.json() == {
+            "code": "INVALID_REQUEST",
+            "detail": "body.20: JSON decode error",
+        }
+        mock_create_recipe.execute.assert_not_called()
+
+    def test_does_not_create_a_recipe_when_the_request_is_not_readable_text(
+        self,
+        client_with_mock_create_recipe: TestClient,
+        mock_create_recipe: MagicMock,
+    ) -> None:
+        response = client_with_mock_create_recipe.post(
+            "/recipes/",
+            content=b"\xff",
+            headers={"Content-Type": "application/json"},
+        )
+
+        assert response.status_code == 400
+        assert response.json() == {
+            "code": "INVALID_REQUEST",
+            "detail": "There was an error parsing the body",
+        }
         mock_create_recipe.execute.assert_not_called()
 
     def test_does_not_create_a_recipe_when_the_request_has_an_unknown_field(
@@ -156,6 +177,7 @@ class TestCreateRecipeController:
         )
 
         assert response.status_code == 500
+        assert response.text == "Internal Server Error"
 
     def test_answers_with_a_server_error_when_the_failure_has_no_error_code(
         self,
@@ -169,3 +191,4 @@ class TestCreateRecipeController:
         )
 
         assert response.status_code == 500
+        assert response.text == "Internal Server Error"
