@@ -17,8 +17,6 @@ jobs:
         run: make wait-db
       - name: Migrate the database
         run: make migrate
-      - name: Migrate the database again
-        run: make migrate
       - name: Linting
         run: make linting
       - name: Tests
