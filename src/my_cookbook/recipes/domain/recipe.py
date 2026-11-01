@@ -1,24 +1,9 @@
-from dataclasses import dataclass
-
-from my_cookbook.recipes.domain.exceptions import InvalidRecipeName
-
-
-@dataclass
-class RecipeName:
-    _value: str
-
-    def __init__(self, value: str) -> None:
-        if value == "" or len(value) < 5:
-            raise InvalidRecipeName()
-
-        self._value = value
-
-    @property
-    def value(self) -> str:
-        return self._value
+from my_cookbook.recipes.domain.recipe_id import RecipeId
+from my_cookbook.recipes.domain.recipe_name import RecipeName
 
 
 class Recipe:
-    def __init__(self, name: RecipeName, description: str) -> None:
+    def __init__(self, id: RecipeId, name: RecipeName, description: str) -> None:
+        self.id = id
         self.name = name
         self.description = description

@@ -33,14 +33,6 @@ Code and documentation are written in English.
 | **The code yardstick** | `code-style`, `architecture`, `domain`, `application`, `infrastructure`, `testing` | Whoever implements before writing and whoever reviews before blocking |
 | **How we work here** | `git-workflow.md`, this `CLAUDE.md` | You and me in session |
 
-## Code that is NOT a reference
-
-It predates the conventions. Do not imitate it when writing new code:
-
-- `Recipe` and `CreateRecipe`: they do not yet fully follow `docs/conventions/domain.md` (the recipe has no
-  id) nor `docs/conventions/application.md` (the name of the `execute` parameter). They are migrated when
-  touched.
-
 ## How we work
 
 - **TDD**: first the failing test, then the minimal code to make it pass, then the refactor.
