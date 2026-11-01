@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+
 from my_cookbook.recipes.domain.recipe import Recipe
 
 
