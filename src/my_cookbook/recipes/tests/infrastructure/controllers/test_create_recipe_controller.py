@@ -7,15 +7,20 @@ from fastapi import Depends
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from app import app, get_recipe_repository, get_session, get_session_factory
+from app import app
 from my_cookbook.recipes.domain.recipe_name import RecipeName
 from my_cookbook.recipes.domain.recipe_repository import RecipeRepository
+from my_cookbook.recipes.infrastructure.dependencies import (
+    get_recipe_repository,
+    get_session,
+    get_session_factory,
+)
 from my_cookbook.recipes.tests.infrastructure.fake_recipe_repository import (
     FakeRecipeRepository,
 )
 
 
-class TestCreateRecipeEndpoint:
+class TestCreateRecipeController:
     @pytest.fixture
     def fake_recipe_repository(self) -> FakeRecipeRepository:
         return FakeRecipeRepository()

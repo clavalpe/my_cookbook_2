@@ -4,7 +4,7 @@
 
 ```
 src/
-  app.py                              FastAPI entrypoint: wires dependencies and registers routers
+  app.py                              FastAPI entrypoint: creates the app, includes the routers and registers the exception handlers
   my_cookbook/
     {context}/                        one context per business area (today, `recipes`)
       domain/
@@ -16,8 +16,11 @@ src/
         {use_case}.py                 one use case per module, with its DTO
       infrastructure/
         {impl}_{port}.py              the adapter is named after its implementation
-        {contract}.py                 one boundary model per concept
-      tests/                          co-located, mirroring the layers above
+        {record}.py                   one table model per concept
+        controllers/
+          {feature}_controller.py     one file per feature: its router, request and response models together
+        dependencies.py               the providers that wire session, adapter and use case
+      tests/                          co-located, mirroring the layers above (controllers included)
         mothers/                      Object Mothers
 migrations/                           alembic
 ```

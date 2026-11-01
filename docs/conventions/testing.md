@@ -36,7 +36,7 @@ passes or fails depending on what you have installed, and that is not a yardstic
 - **Database adapter**: tested against the real Postgres of the environment, not against a doubled session.
   A `Session` double would only check that we call our own mapping. Each test leaves the database as it
   found it.
-- **Endpoint**: with FastAPI's test client, the real use case and the repository doubled. The assert is the
+- **Controller** (`tests/infrastructure/controllers/test_{feature}_controller.py`): with FastAPI's test client, the real use case and the repository doubled. The assert is the
   **status code and the literal body** of the response, not a model of it rewritten in the test.
 - **Before adding a test, check whether the behavior is already covered.** It only goes in if it adds a
   different dimension.
