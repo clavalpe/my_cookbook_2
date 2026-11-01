@@ -1,4 +1,4 @@
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Generator
 from functools import lru_cache
 from typing import Annotated
 
@@ -22,7 +22,7 @@ def get_session_factory() -> Callable[[], Session]:
 
 def get_session(
     session_factory: Annotated[Callable[[], Session], Depends(get_session_factory)],
-) -> Iterator[Session]:
+) -> Generator[Session]:
     session = session_factory()
     try:
         yield session

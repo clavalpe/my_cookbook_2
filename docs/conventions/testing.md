@@ -36,8 +36,20 @@ passes or fails depending on what you have installed, and that is not a yardstic
 - **Database adapter**: tested against the real Postgres of the environment, not against a doubled session.
   A `Session` double would only check that we call our own mapping. Each test leaves the database as it
   found it.
-- **Controller** (`tests/infrastructure/controllers/test_{feature}_controller.py`): with FastAPI's test client, the real use case and the repository doubled. The assert is the
-  **status code and the literal body** of the response, not a model of it rewritten in the test.
+- **Controller unit tests** (`tests/infrastructure/controllers/test_{feature}_controller.py`): with FastAPI's
+  test client and the **application layer doubled** (the use case replaced through `dependency_overrides`).
+  They check what the controller owns and nothing else: how the request becomes the use case input, how the
+  result is serialized, what is rejected before the use case runs, and how an exception coming out of the use
+  case is answered. Business rules are not tested here: they are already tested at the application level, and
+  a controller test must not repeat them through a double. The assert is the **status code and the literal
+  body** of the response, not a model of it rewritten in the test.
+- **One happy path per controller, against the real database**
+  (`tests/infrastructure/controllers/test_{feature}_controller_with_database.py`): the real use case, adapter
+  and session, no doubles, to prove the layers are wired together. It asserts the response and what ended up
+  in the database, and deletes what it created so the database is as it was found. It is the **only** test of
+  the controller that touches the database; other cases belong to the unit tests.
+- **Dependency providers** (`tests/infrastructure/test_dependencies.py`): tested on their own, with their
+  collaborators doubled, since they are not part of any controller.
 - **Before adding a test, check whether the behavior is already covered.** It only goes in if it adds a
   different dimension.
 
@@ -72,5 +84,7 @@ not a `create(...)` with everything defaulted.
 - Building a domain object by hand in the test when there is a mother.
 - A loose module-level test helper, or one repeated in two files.
 - A database adapter test against a doubled `Session`.
+- A controller test that exercises a business rule through a doubled repository.
+- A second database-backed test of the same controller, instead of a unit test with the application layer doubled.
 - A test that leaves rows in the database for the next one.
 - An assert against a reimplemented model of the format instead of the literal payload.
