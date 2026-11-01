@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 from uuid import uuid4
 
-from my_cookbook.recipes.domain.recipe import Recipe, RecipeName
+from my_cookbook.recipes.domain.recipe import Recipe
 from my_cookbook.recipes.domain.recipe_id import RecipeId
+from my_cookbook.recipes.domain.recipe_name import RecipeName
 from my_cookbook.recipes.domain.recipe_repository import RecipeRepository
 
 

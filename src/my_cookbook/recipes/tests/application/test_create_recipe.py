@@ -2,9 +2,12 @@ from unittest.mock import MagicMock, create_autospec
 
 import pytest
 
-from my_cookbook.recipes.application.create_recipe import CreateRecipe
+from my_cookbook.recipes.application.create_recipe import (
+    CreateRecipe,
+    CreateRecipeResult,
+)
 from my_cookbook.recipes.domain.exceptions import InvalidRecipeName
-from my_cookbook.recipes.domain.recipe import RecipeName
+from my_cookbook.recipes.domain.recipe_name import RecipeName
 from my_cookbook.recipes.domain.recipe_repository import RecipeRepository
 from my_cookbook.recipes.tests.mothers.create_recipe_dto_mother import (
     CreateRecipeDTOMother,
@@ -19,7 +22,9 @@ class TestCreateRecipe:
         )
         return repository
 
-    def test_create_recipe(self, mock_recipe_repository: MagicMock) -> None:
+    def test_hands_the_repository_a_recipe_with_the_name_and_description_of_the_dto(
+        self, mock_recipe_repository: MagicMock
+    ) -> None:
         create_recipe_dto = CreateRecipeDTOMother.omelette()
 
         CreateRecipe(mock_recipe_repository).execute(create_recipe_dto)
@@ -37,7 +42,7 @@ class TestCreateRecipe:
         with pytest.raises(InvalidRecipeName):
             CreateRecipe(mock_recipe_repository).execute(create_recipe_dto)
 
-    def test_does_not_allow_to_create_a_recite_with_a_short_name(
+    def test_does_not_allow_to_create_a_recipe_with_a_name_of_three_characters(
         self, mock_recipe_repository: MagicMock
     ) -> None:
         create_recipe_dto = CreateRecipeDTOMother.named("Ome")
@@ -53,7 +58,7 @@ class TestCreateRecipe:
         )
 
         saved_recipe = mock_recipe_repository.save.call_args[0][0]
-        assert result.id == saved_recipe.id
+        assert result == CreateRecipeResult(saved_recipe.id)
 
     def test_creates_a_different_recipe_on_every_execution_with_the_same_dto(
         self, mock_recipe_repository: MagicMock
