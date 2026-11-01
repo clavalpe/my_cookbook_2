@@ -10,6 +10,7 @@ from sqlalchemy import Engine, create_engine, text
 
 from app import app
 from my_cookbook.recipes.application.create_recipe import CreateRecipe
+from my_cookbook.recipes.domain.exceptions import DuplicatedRecipe, InvalidRecipeName
 from my_cookbook.recipes.infrastructure.dependencies import get_create_recipe
 from my_cookbook.recipes.infrastructure.postgres_settings import PostgresSettings
 from my_cookbook.recipes.tests.infrastructure.alembic_locations import ALEMBIC_INI
@@ -78,6 +79,75 @@ class TestCreateRecipeController:
             (created_recipe_id, "Omelette", "Eggs")
         ]
 
+    def test_answers_with_the_reason_when_the_recipe_name_is_too_short(
+        self,
+        client_with_mock_create_recipe: TestClient,
+        mock_create_recipe: MagicMock,
+    ) -> None:
+        mock_create_recipe.execute.side_effect = InvalidRecipeName(5)
+
+        response = client_with_mock_create_recipe.post(
+            "/recipes/", json={"name": "Ome", "description": "Eggs"}
+        )
+
+        assert response.status_code == 400
+        assert response.json() == {
+            "code": "INVALID_RECIPE_NAME",
+            "detail": "recipe name must have at least 5 characters",
+        }
+
+    def test_does_not_create_a_recipe_when_the_request_has_no_name(
+        self,
+        client_with_mock_create_recipe: TestClient,
+        mock_create_recipe: MagicMock,
+    ) -> None:
+        response = client_with_mock_create_recipe.post(
+            "/recipes/", json={"description": "Eggs"}
+        )
+
+        assert response.status_code == 400
+        assert response.json() == {
+            "code": "INVALID_REQUEST",
+            "detail": "body.name: Field required",
+        }
+        mock_create_recipe.execute.assert_not_called()
+
+    def test_does_not_create_a_recipe_when_the_request_is_not_valid_json(
+        self,
+        client_with_mock_create_recipe: TestClient,
+        mock_create_recipe: MagicMock,
+    ) -> None:
+        response = client_with_mock_create_recipe.post(
+            "/recipes/",
+            content='{"name": "Omelette",',
+            headers={"Content-Type": "application/json"},
+        )
+
+        assert response.status_code == 400
+        assert response.json() == {
+            "code": "INVALID_REQUEST",
+            "detail": "body.20: JSON decode error",
+        }
+        mock_create_recipe.execute.assert_not_called()
+
+    def test_does_not_create_a_recipe_when_the_request_is_not_readable_text(
+        self,
+        client_with_mock_create_recipe: TestClient,
+        mock_create_recipe: MagicMock,
+    ) -> None:
+        response = client_with_mock_create_recipe.post(
+            "/recipes/",
+            content=b"\xff",
+            headers={"Content-Type": "application/json"},
+        )
+
+        assert response.status_code == 400
+        assert response.json() == {
+            "code": "INVALID_REQUEST",
+            "detail": "There was an error parsing the body",
+        }
+        mock_create_recipe.execute.assert_not_called()
+
     def test_does_not_create_a_recipe_when_the_request_has_an_unknown_field(
         self,
         client_with_mock_create_recipe: TestClient,
@@ -88,7 +158,11 @@ class TestCreateRecipeController:
             json={"name": "Omelette", "description": "Eggs", "calories": 300},
         )
 
-        assert response.status_code == 422
+        assert response.status_code == 400
+        assert response.json() == {
+            "code": "INVALID_REQUEST",
+            "detail": "body.calories: Extra inputs are not permitted",
+        }
         mock_create_recipe.execute.assert_not_called()
 
     def test_answers_with_a_server_error_when_the_recipe_cannot_be_created(
@@ -103,3 +177,18 @@ class TestCreateRecipeController:
         )
 
         assert response.status_code == 500
+        assert response.text == "Internal Server Error"
+
+    def test_answers_with_a_server_error_when_the_failure_has_no_error_code(
+        self,
+        client_with_mock_create_recipe: TestClient,
+        mock_create_recipe: MagicMock,
+    ) -> None:
+        mock_create_recipe.execute.side_effect = DuplicatedRecipe()
+
+        response = client_with_mock_create_recipe.post(
+            "/recipes/", json={"name": "Omelette", "description": "Eggs"}
+        )
+
+        assert response.status_code == 500
+        assert response.text == "Internal Server Error"
