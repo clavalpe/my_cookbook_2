@@ -41,6 +41,7 @@ the code must understand it.
 - A generic container name (`data`, `result`, `item`, `value`, `info`) is allowed only when the business has
   no better word for it.
 
+## Anti-patterns
 
 - A comment or docstring explaining code that could be renamed. Rewrite the code.
 - An import inside a function or method.
