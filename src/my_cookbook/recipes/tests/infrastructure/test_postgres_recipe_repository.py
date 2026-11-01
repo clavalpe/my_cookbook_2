@@ -18,9 +18,12 @@ from my_cookbook.recipes.tests.mothers.recipe_mother import RecipeMother
 
 
 class TestPostgresRecipeRepository:
+    @pytest.fixture(scope="class", autouse=True)
+    def migrated_database(self) -> None:
+        command.upgrade(Config(str(ALEMBIC_INI)), "head")
+
     @pytest.fixture
     def session(self) -> Iterator[Session]:
-        command.upgrade(Config(str(ALEMBIC_INI)), "head")
         engine = create_engine(PostgresSettings.from_environment().url)
         connection = engine.connect()
         outer_transaction = connection.begin()
@@ -55,7 +58,7 @@ class TestPostgresRecipeRepository:
             (RecipeMother.ANOTHER_OMELETTE_ID, "Omelette", "Omelette description"),
         ]
 
-    def test_does_not_keep_the_recipe_when_the_session_is_rolled_back(
+    def test_does_not_keep_the_recipe_when_the_work_in_progress_is_abandoned(
         self, session: Session, recipe_repository: PostgresRecipeRepository
     ) -> None:
         recipe_repository.save(RecipeMother.omelette())
@@ -93,6 +96,24 @@ class TestPostgresRecipeRepository:
     ) -> None:
         with pytest.raises(IntegrityError):
             recipe_repository.save(RecipeMother.omelette_without_description())
+
+    def test_does_not_report_a_duplicated_recipe_when_the_ids_differ(
+        self, session: Session, recipe_repository: PostgresRecipeRepository
+    ) -> None:
+        recipe_repository.save(RecipeMother.omelette())
+        self.make_next_row_number_collide_with_the_stored_recipe(session)
+
+        with pytest.raises(IntegrityError):
+            recipe_repository.save(RecipeMother.another_omelette())
+
+    @staticmethod
+    def make_next_row_number_collide_with_the_stored_recipe(session: Session) -> None:
+        session.execute(
+            text(
+                "SELECT setval(pg_get_serial_sequence('recipes', 'id'),"
+                " (SELECT max(id) FROM recipes), false)"
+            )
+        )
 
     @staticmethod
     def stored_recipes(session: Session) -> list[tuple[UUID, str, str]]:

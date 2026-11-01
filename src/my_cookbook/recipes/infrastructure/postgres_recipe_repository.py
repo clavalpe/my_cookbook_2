@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from psycopg.errors import UniqueViolation
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -9,7 +11,7 @@ from my_cookbook.recipes.infrastructure.recipe_record import RecipeRecord
 
 
 class PostgresRecipeRepository(RecipeRepository):
-    RECIPE_ID_UNIQUE_CONSTRAINT = "recipes_recipe_id_key"
+    _RECIPE_ID_UNIQUE_CONSTRAINT: ClassVar[str] = "recipes_recipe_id_key"
 
     def __init__(self, session: Session) -> None:
         self._session = session
@@ -25,13 +27,13 @@ class PostgresRecipeRepository(RecipeRepository):
                     )
                 )
         except IntegrityError as error:
-            if self.is_duplicated_recipe_id(error):
+            if self._is_duplicated_recipe_id(error):
                 raise DuplicatedRecipe() from error
             raise
 
     @classmethod
-    def is_duplicated_recipe_id(cls, error: IntegrityError) -> bool:
+    def _is_duplicated_recipe_id(cls, error: IntegrityError) -> bool:
         return (
             isinstance(error.orig, UniqueViolation)
-            and error.orig.diag.constraint_name == cls.RECIPE_ID_UNIQUE_CONSTRAINT
+            and error.orig.diag.constraint_name == cls._RECIPE_ID_UNIQUE_CONSTRAINT
         )
