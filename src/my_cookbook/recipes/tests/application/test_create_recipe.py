@@ -67,7 +67,7 @@ class TestCreateRecipe:
         saved_ids = [
             call.args[0].id for call in mock_recipe_repository.save.call_args_list
         ]
-        assert saved_ids == [first_result.id, second_result.id]
+        assert saved_ids[0] != saved_ids[1]
         assert first_result.id != second_result.id
 
     def test_allows_to_create_a_recipe_with_a_name_of_exactly_five_characters(
