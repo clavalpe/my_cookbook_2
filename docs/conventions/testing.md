@@ -52,6 +52,8 @@ not a `create(...)` with everything defaulted.
 - **`create_autospec(X, spec_set=True, instance=True)`** for stateless ports.
 - **Hand-written stateful doubles** when the test needs to ask what it was handed.
 - **A double doubles what its name says and nothing else.**
+- **A double is named as a double**: `mock_` for an autospec double (`mock_recipe_repository`), `fake_` for a
+  hand-written one. Business naming applies to everything else in the test, but a double must read as one.
 - **Never mock value objects**: use real instances.
 - The arrange **is not built with the piece under test**.
 
