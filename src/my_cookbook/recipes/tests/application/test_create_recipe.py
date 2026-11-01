@@ -22,35 +22,35 @@ class TestCreateRecipe:
         )
         return repository
 
-    def test_hands_the_repository_a_recipe_with_the_name_and_description_of_the_dto(
+    def test_creates_a_recipe_with_the_requested_name_and_description(
         self, mock_recipe_repository: MagicMock
     ) -> None:
-        create_recipe_dto = CreateRecipeDTOMother.omelette()
+        requested_recipe = CreateRecipeDTOMother.omelette()
 
-        CreateRecipe(mock_recipe_repository).execute(create_recipe_dto)
+        CreateRecipe(mock_recipe_repository).execute(requested_recipe)
 
         mock_recipe_repository.save.assert_called_once()
-        recipe = mock_recipe_repository.save.call_args[0][0]
-        assert recipe.name == RecipeName("Omelette")
-        assert recipe.description == "Omelette description"
+        saved_recipe = mock_recipe_repository.save.call_args[0][0]
+        assert saved_recipe.name == RecipeName("Omelette")
+        assert saved_recipe.description == "Omelette description"
 
-    def test_does_not_allow_to_create_an_empty_name_recipe(
+    def test_does_not_allow_to_create_a_recipe_with_an_empty_name(
         self, mock_recipe_repository: MagicMock
     ) -> None:
-        create_recipe_dto = CreateRecipeDTOMother.named("")
+        requested_recipe = CreateRecipeDTOMother.named("")
 
         with pytest.raises(InvalidRecipeName):
-            CreateRecipe(mock_recipe_repository).execute(create_recipe_dto)
+            CreateRecipe(mock_recipe_repository).execute(requested_recipe)
 
     def test_does_not_allow_to_create_a_recipe_with_a_name_of_three_characters(
         self, mock_recipe_repository: MagicMock
     ) -> None:
-        create_recipe_dto = CreateRecipeDTOMother.named("Ome")
+        requested_recipe = CreateRecipeDTOMother.named("Ome")
 
         with pytest.raises(InvalidRecipeName):
-            CreateRecipe(mock_recipe_repository).execute(create_recipe_dto)
+            CreateRecipe(mock_recipe_repository).execute(requested_recipe)
 
-    def test_returns_the_id_of_the_recipe_handed_to_the_repository(
+    def test_returns_the_id_of_the_saved_recipe(
         self, mock_recipe_repository: MagicMock
     ) -> None:
         result = CreateRecipe(mock_recipe_repository).execute(
@@ -60,14 +60,14 @@ class TestCreateRecipe:
         saved_recipe = mock_recipe_repository.save.call_args[0][0]
         assert result == CreateRecipeResult(saved_recipe.id)
 
-    def test_creates_a_different_recipe_on_every_execution_with_the_same_dto(
+    def test_creates_a_different_recipe_every_time_the_same_recipe_is_requested(
         self, mock_recipe_repository: MagicMock
     ) -> None:
         create_recipe = CreateRecipe(mock_recipe_repository)
-        dto = CreateRecipeDTOMother.omelette()
+        requested_recipe = CreateRecipeDTOMother.omelette()
 
-        first_result = create_recipe.execute(dto)
-        second_result = create_recipe.execute(dto)
+        first_result = create_recipe.execute(requested_recipe)
+        second_result = create_recipe.execute(requested_recipe)
 
         saved_ids = [
             call.args[0].id for call in mock_recipe_repository.save.call_args_list

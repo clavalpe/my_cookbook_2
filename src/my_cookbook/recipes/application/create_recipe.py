@@ -22,10 +22,10 @@ class CreateRecipe:
     def __init__(self, recipe_repository: RecipeRepository) -> None:
         self._recipe_repository = recipe_repository
 
-    def execute(self, dto: CreateRecipeDTO) -> CreateRecipeResult:
-        recipe_name = RecipeName(dto.name)
+    def execute(self, requested_recipe: CreateRecipeDTO) -> CreateRecipeResult:
+        recipe_name = RecipeName(requested_recipe.name)
 
-        recipe = Recipe(RecipeId(uuid4()), recipe_name, dto.description)
+        recipe = Recipe(RecipeId(uuid4()), recipe_name, requested_recipe.description)
         self._recipe_repository.save(recipe)
 
         return CreateRecipeResult(recipe.id)
