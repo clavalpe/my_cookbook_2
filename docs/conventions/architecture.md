@@ -1,59 +1,59 @@
-# Arquitectura y herramientas
+# Architecture and tooling
 
-## Estructura
+## Structure
 
 ```
 src/
-  app.py                              entrypoint de FastAPI: monta las dependencias y registra los routers
+  app.py                              FastAPI entrypoint: wires dependencies and registers routers
   my_cookbook/
-    {contexto}/                       un contexto por área de negocio (hoy, `recipes`)
+    {context}/                        one context per business area (today, `recipes`)
       domain/
-        {value_object}.py             un value object por módulo
-        {entity}.py                   una entidad por módulo
-        {puerto}.py                   un puerto por fichero
-        exceptions.py                 las excepciones del dominio, juntas
+        {value_object}.py             one value object per module
+        {entity}.py                   one entity per module
+        {port}.py                     one port per file
+        exceptions.py                 the domain exceptions, together
       application/
-        {caso_de_uso}.py              un caso de uso por módulo, con su DTO
+        {use_case}.py                 one use case per module, with its DTO
       infrastructure/
-        {impl}_{puerto}.py            el adaptador se llama como su implementación
-        {contrato}.py                 un modelo de frontera por concepto
-      tests/                          co-localizados, espejando las capas de arriba
+        {impl}_{port}.py              the adapter is named after its implementation
+        {contract}.py                 one boundary model per concept
+      tests/                          co-located, mirroring the layers above
         mothers/                      Object Mothers
 migrations/                           alembic
 ```
 
-- **Un concepto por módulo**, y con él lo que no existe sin él. La vara: si borras el concepto principal,
-  ¿el otro tipo se queda sin consumidor y sin sentido propio? Solo entonces comparten fichero. Un tipo que
-  construye otro sitio o consume otra capa es un concepto y va a su módulo.
-- Las excepciones del dominio son la excepción a la regla: viven juntas en `domain/exceptions.py`.
-- **El flujo de dependencias va hacia dentro**: `infrastructure` conoce `application` y `domain`,
-  `application` conoce `domain`, y `domain` no conoce a nadie.
-- **Los tests viven dentro del contexto**, no en una carpeta aparte, y espejan las capas que se testean.
-  No hay un árbol de tests de dominio (ver `docs/conventions/testing.md`).
+- **One concept per module**, together with whatever cannot exist without it. The test: if you delete the
+  main concept, is the other type left with no consumer and no meaning of its own? Only then do they share a
+  file. A type that another place constructs or another layer consumes is a concept and gets its own module.
+- Domain exceptions are the exception to the rule: they live together in `domain/exceptions.py`.
+- **Dependencies point inwards**: `infrastructure` knows `application` and `domain`, `application` knows
+  `domain`, and `domain` knows nobody.
+- **Tests live inside the context**, not in a separate folder, and mirror the layers they test. There is no
+  domain test tree (see `docs/conventions/testing.md`).
 
-## Una regla de negocio se escribe una vez
+## A business rule is written once
 
-La regla de tres gobierna el parecido del código: trozos que se repiten se extraen cuando extraerlos deja
-el sitio mejor. **No gobierna dónde vive una decisión.** Una regla de negocio -qué nombre es válido, qué
-cuenta como receta duplicada- se escribe una vez, en el dominio, y quien la necesita pregunta.
+The rule of three governs how similar code looks: repeated pieces get extracted when extracting leaves the
+place better. **It does not govern where a decision lives.** A business rule -which name is valid, what
+counts as a duplicate recipe- is written once, in the domain, and whoever needs it asks.
 
-**La vara: si esta decisión cambiara, ¿cuántos ficheros hay que tocar para que el programa siga siendo
-coherente?** Uno, o está repartida. Dos sitios que hoy dicen lo mismo con palabras distintas ya están
-repartidos.
+**The test: if this decision changed, how many files would have to change for the program to stay
+coherent?** One, or it is spread out. Two places that say the same thing today in different words are
+already spread out.
 
-## Herramientas
+## Tooling
 
-Python 3.14, FastAPI, SQLAlchemy 2, alembic, psycopg 3, PostgreSQL 17, `pytest`, `mypy`, `ruff`. Todo se
-ejecuta dentro de los contenedores de `docker/`; el `Makefile` es la interfaz.
+Python 3.14, FastAPI, SQLAlchemy 2, alembic, psycopg 3, PostgreSQL 17, `pytest`, `mypy`, `ruff`.
+Everything runs inside the containers under `docker/`; the `Makefile` is the interface.
 
-- **`dataclasses` frozen para value objects y DTOs.** Pydantic solo aparece en los modelos que cruzan la
-  frontera HTTP (ver `docs/conventions/infrastructure.md`).
-- **`abc.ABC` para puertos**, `StrEnum` para vocabularios cerrados, `unittest.mock` para dobles.
+- **Frozen `dataclasses` for value objects and DTOs.** Pydantic only appears in the models that cross the
+  HTTP boundary (see `docs/conventions/infrastructure.md`).
+- **`abc.ABC` for ports**, `StrEnum` for closed vocabularies, `unittest.mock` for doubles.
 
-## Antipatrones
+## Anti-patterns
 
-- Pydantic en `domain/` o en el DTO de un caso de uso.
-- `domain/` importando de `application/` o de `infrastructure/`.
-- Una regla de negocio escrita en dos sitios, aunque las dos redacciones sean distintas.
-- Un helper que las dos copias llaman desde donde estaban: la decisión sigue repartida, con una
-  indirección delante.
+- Pydantic in `domain/` or in a use case DTO.
+- `domain/` importing from `application/` or `infrastructure/`.
+- A business rule written in two places, even if the two wordings differ.
+- A helper that both copies call from where they were: the decision is still spread out, now with an
+  indirection in front.

@@ -1,72 +1,69 @@
 # Tests
 
-## Cómo se mide todo
+## How everything is measured
 
 ```bash
 make linting    # ruff check + ruff format --check + mypy
-make test       # pytest dentro del contenedor
+make test       # pytest inside the container
 ```
 
-Los dos corren dentro de los contenedores (`make env-start` antes). Un `pytest` con el intérprete de tu
-máquina pasa o falla según lo que tengas instalado, y eso no es una vara.
+Both run inside the containers (`make env-start` first). A `pytest` run with your machine's interpreter
+passes or fails depending on what you have installed, and that is not a yardstick.
 
-## Forma de un test
+## Shape of a test
 
-- **Dentro de una clase**, agrupados por el comportamiento que fijan. Nunca funciones sueltas.
-- **Cero prosa**: ni comentarios ni docstrings. El nombre del test es la frase.
-- El nombre dice **qué se garantiza y por qué**, no qué método se llama:
+- **Inside a class**, grouped by the behavior they pin down. Never loose functions.
+- **Zero prose**: no comments and no docstrings. The test name is the sentence.
+- The name says **what is guaranteed and why**, not which method is called:
   `test_does_not_allow_to_create_a_recipe_with_a_short_name`.
-- Los helpers de un test son `@staticmethod` de su clase de test o viven en un módulo compartido, nunca
-  sueltos a nivel de módulo. Los fixtures van dentro de la clase.
-- Estructura arrange / act / assert, separadas por una línea en blanco.
+- A test's helpers are `@staticmethod`s of its test class or live in a shared module, never loose at module
+  level. Fixtures go inside the class.
+- Arrange / act / assert structure, separated by a blank line.
 
-## Qué se testea y qué no
+## What is tested and what is not
 
-- **Outside-in**, en este orden: primero los casos de uso con los puertos doblados, luego la
-  infraestructura. Lo de dentro del dominio se cubre **por ese camino**.
-- **No hay tests unitarios de dominio**, ni siquiera cuando el dominio tiene comportamiento: se comprueba
-  por el camino real por el que llega. La única excepción es un value object con validación propia que no
-  se pueda alcanzar de otra forma. Un test que solo comprueba que un dataclass guarda lo que le pasas mide
-  el lenguaje.
-- **Aplicación**: puertos doblados por constructor, y el assert sobre el **efecto observable** (qué recibió
-  el puerto, qué devolvió el caso de uso).
-- **Adaptador de base de datos**: se prueba contra el Postgres real del entorno, no contra una sesión
-  doblada. Un doble de `Session` solo comprobaría que llamamos a nuestro propio mapeo. Cada test deja la
-  base como la encontró.
-- **Endpoint**: con el cliente de pruebas de FastAPI, el caso de uso real y el repositorio doblado. El
-  assert es el **código de estado y el cuerpo literal** de la respuesta, no un modelo de ella reescrito en
-  el test.
-- **Antes de añadir un test, comprobar si el comportamiento ya está cubierto.** Solo entra si aporta una
-  dimensión distinta.
+- **Outside-in**, in this order: first the use cases with the ports doubled, then infrastructure. What is
+  inside the domain is covered **along that path**.
+- **There are no domain unit tests**, not even when the domain has behavior: it is checked through the real
+  path it arrives by. The only exception is a value object with its own validation that cannot be reached
+  any other way. A test that only checks that a dataclass stores what you give it measures the language.
+- **Application**: ports doubled through the constructor, and the assert on the **observable effect** (what
+  the port received, what the use case returned).
+- **Database adapter**: tested against the real Postgres of the environment, not against a doubled session.
+  A `Session` double would only check that we call our own mapping. Each test leaves the database as it
+  found it.
+- **Endpoint**: with FastAPI's test client, the real use case and the repository doubled. The assert is the
+  **status code and the literal body** of the response, not a model of it rewritten in the test.
+- **Before adding a test, check whether the behavior is already covered.** It only goes in if it adds a
+  different dimension.
 
 ## Object Mothers
 
-Los objetos de un test los construye un mother, no el propio test:
-`tests/mothers/{cosa}_mother.py`. Da defaults sensatos y deja que cada test nombre **solo lo que su caso
-cambia**. Los métodos son escenarios con nombre, no un `create(...)` con todo por defecto.
+A test's objects are built by a mother, not by the test itself: `tests/mothers/{thing}_mother.py`. It gives
+sensible defaults and lets each test name **only what its case changes**. Its methods are named scenarios,
+not a `create(...)` with everything defaulted.
 
-## Dobles
+## Doubles
 
-- **`create_autospec(X, spec_set=True, instance=True)`** para puertos sin estado.
-- **Dobles con estado, a mano**, cuando el test necesita preguntar por lo que se le pasó.
-- **Un doble dobla lo que su nombre dice y nada más.**
-- **Nada de mockear value objects**: se usan instancias reales.
-- El arrange **no se construye con la pieza bajo prueba**.
+- **`create_autospec(X, spec_set=True, instance=True)`** for stateless ports.
+- **Hand-written stateful doubles** when the test needs to ask what it was handed.
+- **A double doubles what its name says and nothing else.**
+- **Never mock value objects**: use real instances.
+- The arrange **is not built with the piece under test**.
 
 ## Asserts
 
-- El assert compara el **valor entero**. Una subcadena suelta da por bueno cualquier texto que la
-  contenga.
-- Un test que espera una excepción comprueba su tipo y, cuando el mensaje es parte del contrato, el mensaje
-  entero.
+- The assert compares the **whole value**. A loose substring passes any text that contains it.
+- A test that expects an exception checks its type and, when the message is part of the contract, the
+  whole message.
 
-## Antipatrones
+## Anti-patterns
 
-- Un test como función suelta.
-- Un comentario o un docstring en un test.
-- Un test de dominio que solo ejercita un dataclass.
-- Construir un objeto de dominio a mano en el test cuando hay mother.
-- Un helper de test suelto a nivel de módulo, o repetido en dos ficheros.
-- Un test del adaptador de base de datos contra una `Session` doblada.
-- Un test que deja filas en la base para el siguiente.
-- Un assert contra un modelo del formato reimplementado en el test, en vez de contra la carga literal.
+- A test as a loose function.
+- A comment or a docstring in a test.
+- A domain test that only exercises a dataclass.
+- Building a domain object by hand in the test when there is a mother.
+- A loose module-level test helper, or one repeated in two files.
+- A database adapter test against a doubled `Session`.
+- A test that leaves rows in the database for the next one.
+- An assert against a reimplemented model of the format instead of the literal payload.

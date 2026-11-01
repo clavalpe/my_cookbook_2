@@ -1,49 +1,51 @@
-# Capa de dominio
+# Domain layer
 
-Entidades, value objects, puertos y excepciones. Python puro: no importa FastAPI, SQLAlchemy ni Pydantic.
+Entities, value objects, ports and exceptions. Pure Python: it does not import FastAPI, SQLAlchemy or
+Pydantic.
 
 ## Value objects
 
-- **Dataclasses `frozen=True`.** Se validan al construirse: un value object que existe es válido.
-- Un dato con una regla (`RecipeName` no puede ser corto) es un value object, no un `str` suelto con la
-  validación en el caso de uso.
-- **Un value object que tiene el dato posee la pregunta.** Si cada consumidor deriva a mano una condición a
-  partir de un campo, la regla está repartida aunque el campo viva en un sitio.
-- Se compara por valor, y en los tests se usan instancias reales: nada de mockear value objects.
+- **Frozen dataclasses (`frozen=True`).** They validate on construction: a value object that exists is
+  valid.
+- A piece of data with a rule (`RecipeName` cannot be short) is a value object, not a bare `str` with the
+  validation in the use case.
+- **A value object that holds the data owns the question.** If each consumer derives a condition by hand
+  from a field, the rule is spread out even though the field lives in one place.
+- They compare by value, and tests use real instances: never mock value objects.
 
-## Entidades
+## Entities
 
-- Una entidad tiene identidad. **El id nace en el dominio o en la aplicación, nunca en la base de datos**:
-  la receta existe con su `RecipeId` (un UUID) antes de guardarse, y `save` no devuelve nada.
-- Lo que construye una entidad válida es su constructor; no hay estados a medio construir.
+- An entity has identity. **The id is born in the domain or the application, never in the database**: the
+  recipe exists with its `RecipeId` (a UUID) before it is saved, and `save` returns nothing.
+- What builds a valid entity is its constructor; there are no half-built states.
 
-## Vocabulario cerrado
+## Closed vocabulary
 
-- Un conjunto cerrado de valores es un `StrEnum` en su propio módulo.
-- **Un estado ausente es un miembro del vocabulario**, no un `| None`.
-- **Un puerto contesta con el vocabulario, no con un `bool`** derivado de él.
+- A closed set of values is a `StrEnum` in its own module.
+- **An absent state is a member of the vocabulary**, not a `| None`.
+- **A port answers with the vocabulary, not with a `bool`** derived from it.
 
-## Puertos
+## Ports
 
-- Un puerto abstracto (`abc.ABC`) por fichero, en `domain/`, con el vocabulario del negocio y sin rastro de
-  la tecnología: `RecipeRepository.save(recipe)`, no `insert_row`.
-- Es lo que el caso de uso conoce. Su adaptador vive en `infrastructure/`.
+- One abstract port (`abc.ABC`) per file, in `domain/`, using business vocabulary and no trace of the
+  technology: `RecipeRepository.save(recipe)`, not `insert_row`.
+- It is what the use case knows. Its adapter lives in `infrastructure/`.
 
-## Excepciones
+## Exceptions
 
-- Las del dominio viven juntas en `domain/exceptions.py` y se leen como un catálogo.
-- Cada una nombra **una razón de negocio** (`InvalidRecipeName`), no una capa técnica.
-- **El mensaje describe el motivo**, no repite el nombre de la clase.
+- Domain exceptions live together in `domain/exceptions.py` and read as a catalogue.
+- Each one names **one business reason** (`InvalidRecipeName`), not a technical layer.
+- **The message describes the reason**, it does not repeat the class name.
 
-## Nada de `dict` crudo como valor de retorno
+## No raw `dict` as a return value
 
-Lo que devuelve la lógica del dominio es un value object o una entidad, no un `dict` ni una tupla de
-posiciones con significado.
+What domain logic returns is a value object or an entity, not a `dict` or a tuple of positions that carry
+meaning.
 
-## Antipatrones
+## Anti-patterns
 
-- Pydantic, SQLAlchemy o FastAPI importados en `domain/`.
-- Un id que solo existe tras guardar.
-- Un `bool` o un `| None` donde el dominio tiene un vocabulario.
-- Validar un nombre en el caso de uso o en el endpoint en vez de en su value object.
-- Una excepción de infraestructura (`IntegrityError`) que se escapa de su adaptador.
+- Pydantic, SQLAlchemy or FastAPI imported in `domain/`.
+- An id that only exists after saving.
+- A `bool` or a `| None` where the domain has a vocabulary.
+- Validating a name in the use case or the endpoint instead of in its value object.
+- An infrastructure exception (`IntegrityError`) escaping its adapter.

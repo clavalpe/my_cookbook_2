@@ -1,41 +1,41 @@
-# Capa de aplicación
+# Application layer
 
-Los casos de uso. Orquestan; la lógica vive en el dominio y la entrada/salida detrás de un puerto.
+The use cases. They orchestrate; the logic lives in the domain and input/output sits behind a port.
 
-## Forma de un caso de uso
+## Shape of a use case
 
-- Un módulo por caso de uso, en `application/`, con el nombre del caso de uso en snake_case.
-- La clase **sin coletilla**: `CreateRecipe`, no `CreateRecipeUseCase` ni `CreateRecipeService`.
-- Método principal `execute(dto: <Name>DTO) -> <Result>`.
-- `<Name>DTO` -y `<Name>Result` si devuelve datos- son dataclasses frozen **en el mismo módulo**.
-- Las dependencias entran por constructor y son puertos, nunca adaptadores.
+- One module per use case, in `application/`, named after the use case in snake_case.
+- The class has **no suffix**: `CreateRecipe`, not `CreateRecipeUseCase` or `CreateRecipeService`.
+- Main method `execute(dto: <Name>DTO) -> <Result>`.
+- `<Name>DTO` -and `<Name>Result` if it returns data- are frozen dataclasses **in the same module**.
+- Dependencies come in through the constructor and are ports, never adapters.
 
 ```python
-# ejemplo/application/{hacer_algo}.py
-class {HacerAlgo}:
-    def __init__(self, {puerto}: {Puerto}) -> None:
-        self._{puerto} = {puerto}
+# example/application/{do_something}.py
+class {DoSomething}:
+    def __init__(self, {port}: {Port}) -> None:
+        self._{port} = {port}
 
-    def execute(self, dto: {HacerAlgo}DTO) -> {Resultado}: ...
+    def execute(self, dto: {DoSomething}DTO) -> {Result}: ...
 ```
 
-## Lo que hace
+## What it does
 
-- Construye las entidades y los value objects del dominio a partir del DTO, y se los pasa a los puertos.
-- **Genera el id** de lo que crea, cuando la entidad lo necesita y el caso de uso es quien la crea.
+- Builds the domain entities and value objects from the DTO and hands them to the ports.
+- **Generates the id** of what it creates, when the entity needs one and the use case is the one creating it.
 
-## Lo que no hace
+## What it does not do
 
-- **No traduce a formatos externos.** Devuelve objetos del dominio o un `Result`; serializar es de la
-  frontera.
-- **No captura excepciones para convertirlas en códigos HTTP.** Las propaga tipadas y las mapea el
-  entrypoint.
-- **No habla con la base de datos ni con FastAPI.** Solo conoce puertos.
-- **No contiene reglas de negocio**: preguntan al dominio.
+- **It does not translate to external formats.** It returns domain objects or a `Result`; serializing
+  belongs to the boundary.
+- **It does not catch exceptions to turn them into HTTP codes.** It propagates them typed and the
+  entrypoint maps them.
+- **It does not talk to the database or to FastAPI.** It only knows ports.
+- **It holds no business rules**: it asks the domain.
 
-## Antipatrones
+## Anti-patterns
 
-- Un caso de uso que importa un adaptador o `sqlalchemy`.
-- Un `try/except` que traduce una excepción del dominio a un código de estado.
-- Una regla de negocio escrita en `execute` en vez de en el dominio.
-- Un DTO con Pydantic.
+- A use case that imports an adapter or `sqlalchemy`.
+- A `try/except` that translates a domain exception into a status code.
+- A business rule written in `execute` instead of in the domain.
+- A DTO built on Pydantic.

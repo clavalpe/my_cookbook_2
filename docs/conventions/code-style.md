@@ -1,31 +1,31 @@
-# Estilo de código
+# Code style
 
-Rige para **todo `.py` nuevo**.
+Applies to **every new `.py` file**.
 
-## Reglas críticas
+## Critical rules
 
-- **Cero prosa: ni comentarios ni docstrings.** Nada de `#`, y tampoco docstring de módulo, de clase, de
-  función ni de atributo. La única excepción es el shebang.
-- **El código va en inglés.** Nombres de fichero y de módulo, clases, funciones, métodos, variables,
-  constantes, miembros de enum, excepciones, nombres de test y los mensajes de error que ve una persona.
-- **Sin imports relativos.** Todo import parte del paquete: `from my_cookbook.recipes.domain.recipe import Recipe`.
-- **Imports al inicio del fichero**, nunca dentro de una función, un método o una clase. Agrupados:
-  stdlib, terceros, proyecto, separados por una línea en blanco.
-- **Todo está tipado**: parámetros, retornos y atributos.
-- **Formato lo decide `ruff format`**, y `ruff check` no puede dar avisos.
+- **Zero prose: no comments and no docstrings.** No `#`, and no module, class, function or attribute
+  docstring. The only exception is the shebang.
+- **Code is written in English.** File and module names, classes, functions, methods, variables, constants,
+  enum members, exceptions, test names and the error messages a person sees.
+- **No relative imports.** Every import starts at the package: `from my_cookbook.recipes.domain.recipe import Recipe`.
+- **Imports go at the top of the file**, never inside a function, method or class. Grouped as stdlib,
+  third party, project, separated by a blank line.
+- **Everything is typed**: parameters, return values and attributes.
+- **Formatting is decided by `ruff format`**, and `ruff check` must report nothing.
 
-## Por qué cero prosa
+## Why zero prose
 
-Si un trozo de código no se entiende sin un párrafo al lado, el arreglo es el código y no el párrafo:
-nombres que digan lo que hacen, funciones pequeñas con una responsabilidad, tipos que hagan imposible el
-mal uso, constantes con nombre en vez de literales. Un `if` que necesitaba tres líneas de explicación es
-casi siempre un método con nombre esperando a nacer.
+If a piece of code cannot be understood without a paragraph next to it, the fix is the code, not the
+paragraph: names that say what they do, small functions with one responsibility, types that make misuse
+impossible, named constants instead of literals. An `if` that needed three lines of explanation is almost
+always a named method waiting to be born.
 
-El *por qué* va al registro duradero: el cuerpo de la pull request y `docs/`.
+The *why* goes to the durable record: the pull request body and `docs/`.
 
-## Antipatrones
+## Anti-patterns
 
-- Un comentario o un docstring explicando código que se podría renombrar. Hay que reescribir el código.
-- Un import dentro de una función o de un método.
-- Un identificador en castellano que no sea dato de un contrato.
-- Una condición redundante: si `len(value) < 5` ya cubre la cadena vacía, `value == ""` sobra.
+- A comment or docstring explaining code that could be renamed. Rewrite the code.
+- An import inside a function or method.
+- An identifier in Spanish that is not contract data.
+- A redundant condition: if `len(value) < 5` already covers the empty string, `value == ""` is superfluous.

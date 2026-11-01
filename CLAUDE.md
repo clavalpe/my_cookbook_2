@@ -1,64 +1,65 @@
-# my_cookbook — instrucciones del repo
+# my_cookbook — repo instructions
 
-API interna de un recetario: FastAPI + PostgreSQL, con dominio, aplicación e infraestructura separados.
-El código va en inglés; la documentación, en castellano.
+Internal recipe-book API: FastAPI + PostgreSQL, with domain, application and infrastructure separated.
+Code and documentation are written in English.
 
-## Regla crítica: convenciones primero
+## Critical rule: conventions first
 
-**ANTES de proponer cualquier cambio de código, incluidos los tests:**
+**BEFORE proposing any code change, tests included:**
 
-1. **IDENTIFICAR** la capa afectada en la tabla de abajo.
-2. **LEER** con la herramienta Read el fichero de `docs/conventions/` que le corresponde, en esta sesión.
-   No vale recordarlo de otra.
-3. **APLICAR** lo que dice, literalmente.
-4. **NO** asumir, no improvisar, no traer patrones de otros proyectos.
+1. **IDENTIFY** the affected layer in the table below.
+2. **READ** with the Read tool the `docs/conventions/` file that matches it, in this session. Remembering
+   it from another one does not count.
+3. **APPLY** what it says, literally.
+4. **DO NOT** assume, improvise or bring in patterns from other projects.
 
-### Convenciones por capa
+### Conventions by layer
 
-**Siempre**, antes de cualquier cambio de código: `docs/conventions/code-style.md`.
+**Always**, before any code change: `docs/conventions/code-style.md`.
 
-| Si vas a tocar... | Leer |
+| If you are going to touch... | Read |
 |---|---|
-| Estructura de carpetas, dependencias, herramientas | `docs/conventions/architecture.md` |
-| Entidades, value objects, puertos, excepciones | `docs/conventions/domain.md` |
-| Casos de uso | `docs/conventions/application.md` |
-| Adaptadores, endpoints, base de datos, migraciones | `docs/conventions/infrastructure.md` |
-| Tests, mothers, dobles | `docs/conventions/testing.md` |
-| Ramas, commits, pull requests, merge | `docs/conventions/git-workflow.md` |
+| Folder structure, dependencies, tooling | `docs/conventions/architecture.md` |
+| Entities, value objects, ports, exceptions | `docs/conventions/domain.md` |
+| Use cases | `docs/conventions/application.md` |
+| Adapters, endpoints, database, migrations | `docs/conventions/infrastructure.md` |
+| Tests, mothers, doubles | `docs/conventions/testing.md` |
+| Branches, commits, pull requests, merge | `docs/conventions/git-workflow.md` |
 
-### Quién lee cada cosa
+### Who reads what
 
-| Qué es | Dónde vive | Quién lo lee |
+| What it is | Where it lives | Who reads it |
 |---|---|---|
-| **La vara del código** | `code-style`, `architecture`, `domain`, `application`, `infrastructure`, `testing` | Quien implementa antes de escribir y quien revisa antes de bloquear |
-| **Cómo se trabaja aquí** | `git-workflow.md`, este `CLAUDE.md` | Tú y yo en sesión |
+| **The code yardstick** | `code-style`, `architecture`, `domain`, `application`, `infrastructure`, `testing` | Whoever implements before writing and whoever reviews before blocking |
+| **How we work here** | `git-workflow.md`, this `CLAUDE.md` | You and me in session |
 
-## Código que NO es referencia
+## Code that is NOT a reference
 
-Preceden a las convenciones. No los imites al escribir código nuevo:
+It predates the conventions. Do not imitate it when writing new code:
 
-- `main.py` en la raíz: resto del "Hello World" inicial, duplica `src/app.py`.
-- `Recipe` y `CreateRecipe`: todavía no cumplen del todo `docs/conventions/domain.md` (la receta no tiene
-  id) ni `docs/conventions/application.md` (el nombre del parámetro de `execute`). Se migran al tocarlos.
+- `main.py` at the root: leftover of the initial "Hello World", duplicates `src/app.py`.
+- `Recipe` and `CreateRecipe`: they do not yet fully follow `docs/conventions/domain.md` (the recipe has no
+  id) nor `docs/conventions/application.md` (the name of the `execute` parameter). They are migrated when
+  touched.
 
-## Cómo se trabaja
+## How we work
 
-- **TDD**: primero el test en rojo, luego el código mínimo en verde, luego el refactor.
-- **Outside-in**: primero el caso de uso con los puertos doblados, luego el adaptador y el endpoint.
-- **Una regla de negocio se escribe una vez**, en el dominio.
+- **TDD**: first the failing test, then the minimal code to make it pass, then the refactor.
+- **Outside-in**: first the use case with ports doubled, then the adapter and the endpoint.
+- **A business rule is written once**, in the domain.
 
-## Cómo se mide un cambio
+## How a change is measured
 
 ```bash
-make env-start   # levanta app y db
+make env-start   # starts app and db
 make linting     # ruff check + ruff format --check + mypy
-make test        # pytest dentro del contenedor
+make test        # pytest inside the container
 ```
 
-Todo verde antes de dar nada por terminado. Los comandos corren dentro del contenedor `app`; el `Makefile` es
-la interfaz.
+Everything green before considering anything done. The commands run inside the `app` container; the
+`Makefile` is the interface.
 
-## Base de datos
+## Database
 
-PostgreSQL 17 (servicio `db` de `docker/docker-compose.yml`), SQLAlchemy 2 y alembic. El esquema lo crean las
-migraciones (`make migrations`, `make migrate`), nunca `create_all`.
+PostgreSQL 17 (the `db` service in `docker/docker-compose.yml`), SQLAlchemy 2 and alembic. The schema is
+created by migrations (`make migrations`, `make migrate`), never `create_all`.
