@@ -47,5 +47,5 @@ meaning.
 - Pydantic, SQLAlchemy or FastAPI imported in `domain/`.
 - An id that only exists after saving.
 - A `bool` or a `| None` where the domain has a vocabulary.
-- Validating a name in the use case or the endpoint instead of in its value object.
+- Validating a name in the use case or the controller instead of in its value object.
 - An infrastructure exception (`IntegrityError`) escaping its adapter.

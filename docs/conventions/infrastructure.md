@@ -5,9 +5,10 @@ HTTP server.
 
 ## What comes from outside is validated on the way in
 
-A request body is validated with one **Pydantic** model per concept, in `infrastructure/`. A field we do
-not know is a rejection (`extra="forbid"`), not an ignored field. Pydantic does not leave this layer: the
-endpoint turns the model into the use case DTO and calls `execute`.
+A request body is validated with one **Pydantic** model per concept, in the controller file of its feature,
+next to its router. A field we do not know is a rejection (`extra="forbid"`), not an ignored field.
+Pydantic does not leave this layer: the controller turns the model into the use case DTO and calls
+`execute`.
 
 ## HTTP contract
 
@@ -49,18 +50,26 @@ The API is internal: there are no custom status codes.
   in the code.
 - Migrations are applied with `make migrate` and generated with `make migrations`.
 
-## Entrypoints
+## Controllers and entrypoints
 
-- `src/app.py` is the only place where the dependency graph is wired: session, adapter, use case.
-  Endpoints receive the already-built use case (through `Depends`).
-- An endpoint does three things: validates the input, calls `execute`, returns the result in the contract
+- **One file per feature** in `infrastructure/controllers/`, named `{feature}_controller.py`. It holds the
+  router, the request model and the response model of that feature, all together: nothing of the feature's
+  HTTP contract lives anywhere else.
+- A controller does three things: validates the input, calls `execute`, returns the result in the contract
   format. Anything else belongs to another layer.
+- **The providers that wire the dependency graph** -session, adapter, use case- live in
+  `infrastructure/dependencies.py`, the only place where it is built. Controllers receive the already-built
+  use case through `Depends`, and import their providers from there, never from `src/app.py`.
+- `src/app.py` only creates the FastAPI app, includes the router of each controller and registers the
+  exception handlers.
 - Routes with a trailing slash, like `/health/`.
 
 ## Anti-patterns
 
-- A business rule in an endpoint or an adapter.
-- A `try/except` per endpoint to produce the `400`, instead of a single handler.
+- A business rule in a controller or an adapter.
+- A request or response model outside the controller file of its feature.
+- A dependency provider in a controller or in `src/app.py` instead of `infrastructure/dependencies.py`.
+- A `try/except` per controller to produce the `400`, instead of a single handler.
 - A status code other than `400` for a business error.
 - A Pydantic model in `domain/` or `application/`.
 - An adapter that opens its own connection.
