@@ -1,3 +1,3 @@
 class InvalidRecipeName(Exception):
-    def __init__(self) -> None:
-        super().__init__("recipe name must have at least 5 characters")
+    def __init__(self, minimum_length: int) -> None:
+        super().__init__(f"recipe name must have at least {minimum_length} characters")

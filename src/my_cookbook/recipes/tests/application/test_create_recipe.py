@@ -2,7 +2,7 @@ from unittest.mock import MagicMock, create_autospec
 
 import pytest
 
-from my_cookbook.recipes.application.create_recipe import CreateRecipe, CreateRecipeDTO
+from my_cookbook.recipes.application.create_recipe import CreateRecipe
 from my_cookbook.recipes.domain.exceptions import InvalidRecipeName
 from my_cookbook.recipes.domain.recipe import RecipeName
 from my_cookbook.recipes.domain.recipe_repository import RecipeRepository
@@ -20,10 +20,7 @@ class TestCreateRecipe:
         return repository
 
     def test_create_recipe(self, mock_recipe_repository: MagicMock) -> None:
-        create_recipe_dto = CreateRecipeDTO(
-            name="Omelette",
-            description="Omelette description",
-        )
+        create_recipe_dto = CreateRecipeDTOMother.omelette()
 
         CreateRecipe(mock_recipe_repository).execute(create_recipe_dto)
 
@@ -35,10 +32,7 @@ class TestCreateRecipe:
     def test_does_not_allow_to_create_an_empty_name_recipe(
         self, mock_recipe_repository: MagicMock
     ) -> None:
-        create_recipe_dto = CreateRecipeDTO(
-            name="",
-            description="Omelette description",
-        )
+        create_recipe_dto = CreateRecipeDTOMother.named("")
 
         with pytest.raises(InvalidRecipeName):
             CreateRecipe(mock_recipe_repository).execute(create_recipe_dto)
@@ -46,10 +40,7 @@ class TestCreateRecipe:
     def test_does_not_allow_to_create_a_recite_with_a_short_name(
         self, mock_recipe_repository: MagicMock
     ) -> None:
-        create_recipe_dto = CreateRecipeDTO(
-            name="Ome",
-            description="Omelette description",
-        )
+        create_recipe_dto = CreateRecipeDTOMother.named("Ome")
 
         with pytest.raises(InvalidRecipeName):
             CreateRecipe(mock_recipe_repository).execute(create_recipe_dto)
