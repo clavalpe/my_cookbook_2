@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start the environment
+        run: make env-start
+      - name: Wait for the database
+        run: make wait-db
+      - name: Linting
+        run: make linting
+      - name: Tests
+        run: make test
+      - name: Tear down the environment
+        if: always()
+        run: make destroy-containers
