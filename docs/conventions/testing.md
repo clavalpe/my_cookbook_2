@@ -36,18 +36,19 @@ passes or fails depending on what you have installed, and that is not a yardstic
 - **Database adapter**: tested against the real Postgres of the environment, not against a doubled session.
   A `Session` double would only check that we call our own mapping. Each test leaves the database as it
   found it.
-- **Controller unit tests** (`tests/infrastructure/controllers/test_{feature}_controller.py`): with FastAPI's
-  test client and the **application layer doubled** (the use case replaced through `dependency_overrides`).
-  They check what the controller owns and nothing else: how the request becomes the use case input, how the
-  result is serialized, what is rejected before the use case runs, and how an exception coming out of the use
-  case is answered. Business rules are not tested here: they are already tested at the application level, and
-  a controller test must not repeat them through a double. The assert is the **status code and the literal
-  body** of the response, not a model of it rewritten in the test.
-- **One happy path per controller, against the real database**
-  (`tests/infrastructure/controllers/test_{feature}_controller_with_database.py`): the real use case, adapter
-  and session, no doubles, to prove the layers are wired together. It asserts the response and what ended up
-  in the database, and deletes what it created so the database is as it was found. It is the **only** test of
-  the controller that touches the database; other cases belong to the unit tests.
+- **Controller**: **one test file per controller** (`tests/infrastructure/controllers/test_{feature}_controller.py`)
+  with two kinds of test, and nothing that the application tests already cover:
+  - **One happy path against the real database**: the real use case, adapter and session, no doubles, to prove
+    the layers are wired together. It asserts the response and what ended up in the database, and deletes what
+    it created so the database is as it was found. It is the **only** test of the controller that touches the
+    database, and it already shows how the request becomes the use case input and how the result is
+    serialized, so no other test repeats that.
+  - **Unit tests with the application layer doubled** (the use case replaced through `dependency_overrides`),
+    only for what the controller decides on its own and the happy path does not show: what is rejected before
+    the use case runs, how an exception coming out of the use case is answered, any serialization the happy
+    path does not exercise. Business rules are never tested here: they are tested at the application level.
+  The assert is the **status code and the literal body** of the response, not a model of it rewritten in the
+  test.
 - **Dependency providers** (`tests/infrastructure/test_dependencies.py`): tested on their own, with their
   collaborators doubled, since they are not part of any controller.
 - **Before adding a test, check whether the behavior is already covered.** It only goes in if it adds a
@@ -85,6 +86,7 @@ not a `create(...)` with everything defaulted.
 - A loose module-level test helper, or one repeated in two files.
 - A database adapter test against a doubled `Session`.
 - A controller test that exercises a business rule through a doubled repository.
-- A second database-backed test of the same controller, instead of a unit test with the application layer doubled.
+- More than one test file for the same controller, or a second database-backed test of it.
+- A controller test that repeats what the happy path or the application tests already cover (the request-to-input mapping, the id serialization, a business rule).
 - A test that leaves rows in the database for the next one.
 - An assert against a reimplemented model of the format instead of the literal payload.

@@ -1,35 +1,53 @@
 from collections.abc import Iterator
 from unittest.mock import MagicMock, create_autospec
+from uuid import UUID
 
 import pytest
+from alembic import command
+from alembic.config import Config
 from fastapi.testclient import TestClient
+from sqlalchemy import Engine, create_engine, text
 
 from app import app
-from my_cookbook.recipes.application.create_recipe import (
-    CreateRecipe,
-    CreateRecipeResult,
-)
-from my_cookbook.recipes.domain.recipe_id import RecipeId
+from my_cookbook.recipes.application.create_recipe import CreateRecipe
 from my_cookbook.recipes.infrastructure.dependencies import get_create_recipe
-from my_cookbook.recipes.tests.mothers.create_recipe_dto_mother import (
-    CreateRecipeDTOMother,
-)
-from my_cookbook.recipes.tests.mothers.recipe_mother import RecipeMother
+from my_cookbook.recipes.infrastructure.postgres_settings import PostgresSettings
+from my_cookbook.recipes.tests.infrastructure.alembic_locations import ALEMBIC_INI
 
 
 class TestCreateRecipeController:
+    @pytest.fixture
+    def migrated_database(self) -> None:
+        command.upgrade(Config(str(ALEMBIC_INI)), "head")
+
+    @pytest.fixture
+    def engine(self) -> Iterator[Engine]:
+        engine = create_engine(PostgresSettings.from_environment().url)
+        yield engine
+        engine.dispose()
+
+    @pytest.fixture
+    def created_recipe_ids(self, engine: Engine) -> Iterator[list[UUID]]:
+        created_recipe_ids: list[UUID] = []
+        yield created_recipe_ids
+        with engine.begin() as connection:
+            for recipe_id in created_recipe_ids:
+                connection.execute(
+                    text("delete from recipes where recipe_id = :recipe_id"),
+                    {"recipe_id": recipe_id},
+                )
+
     @pytest.fixture
     def mock_create_recipe(self) -> MagicMock:
         create_recipe: MagicMock = create_autospec(
             CreateRecipe, spec_set=True, instance=True
         )
-        create_recipe.execute.return_value = CreateRecipeResult(
-            RecipeId(RecipeMother.OMELETTE_ID)
-        )
         return create_recipe
 
     @pytest.fixture
-    def client(self, mock_create_recipe: MagicMock) -> Iterator[TestClient]:
+    def client_with_mock_create_recipe(
+        self, mock_create_recipe: MagicMock
+    ) -> Iterator[TestClient]:
         def provide_mock_create_recipe() -> MagicMock:
             return mock_create_recipe
 
@@ -37,41 +55,35 @@ class TestCreateRecipeController:
         yield TestClient(app, raise_server_exceptions=False)
         app.dependency_overrides.clear()
 
-    def test_answers_with_the_id_of_the_created_recipe_as_text(
-        self, client: TestClient
+    @pytest.mark.usefixtures("migrated_database")
+    def test_stores_the_requested_recipe_and_answers_with_its_id(
+        self, engine: Engine, created_recipe_ids: list[UUID]
     ) -> None:
-        requested_recipe = CreateRecipeDTOMother.omelette()
-
-        response = client.post(
-            "/recipes/",
-            json={
-                "name": requested_recipe.name,
-                "description": requested_recipe.description,
-            },
+        response = TestClient(app).post(
+            "/recipes/", json={"name": "Omelette", "description": "Eggs"}
         )
 
+        created_recipe_id = UUID(response.json()["id"])
+        created_recipe_ids.append(created_recipe_id)
         assert response.status_code == 201
-        assert response.json() == {"id": "00000000-0000-0000-0000-000000000001"}
-
-    def test_creates_the_recipe_with_the_requested_name_and_description(
-        self, client: TestClient, mock_create_recipe: MagicMock
-    ) -> None:
-        requested_recipe = CreateRecipeDTOMother.omelette()
-
-        client.post(
-            "/recipes/",
-            json={
-                "name": requested_recipe.name,
-                "description": requested_recipe.description,
-            },
-        )
-
-        mock_create_recipe.execute.assert_called_once_with(requested_recipe)
+        with engine.connect() as connection:
+            stored_recipes = connection.execute(
+                text(
+                    "select recipe_id, name, description from recipes"
+                    " where recipe_id = :recipe_id"
+                ),
+                {"recipe_id": created_recipe_id},
+            ).all()
+        assert [tuple(stored_recipe) for stored_recipe in stored_recipes] == [
+            (created_recipe_id, "Omelette", "Eggs")
+        ]
 
     def test_does_not_create_a_recipe_when_the_request_has_an_unknown_field(
-        self, client: TestClient, mock_create_recipe: MagicMock
+        self,
+        client_with_mock_create_recipe: TestClient,
+        mock_create_recipe: MagicMock,
     ) -> None:
-        response = client.post(
+        response = client_with_mock_create_recipe.post(
             "/recipes/",
             json={"name": "Omelette", "description": "Eggs", "calories": 300},
         )
@@ -80,11 +92,13 @@ class TestCreateRecipeController:
         mock_create_recipe.execute.assert_not_called()
 
     def test_answers_with_a_server_error_when_the_recipe_cannot_be_created(
-        self, client: TestClient, mock_create_recipe: MagicMock
+        self,
+        client_with_mock_create_recipe: TestClient,
+        mock_create_recipe: MagicMock,
     ) -> None:
         mock_create_recipe.execute.side_effect = RuntimeError
 
-        response = client.post(
+        response = client_with_mock_create_recipe.post(
             "/recipes/", json={"name": "Omelette", "description": "Eggs"}
         )
 
