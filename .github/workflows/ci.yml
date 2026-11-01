@@ -15,6 +15,10 @@ jobs:
         run: make env-start
       - name: Wait for the database
         run: make wait-db
+      - name: Migrate the database
+        run: make migrate
+      - name: Migrate the database again
+        run: make migrate
       - name: Linting
         run: make linting
       - name: Tests

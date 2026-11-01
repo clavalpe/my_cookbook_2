@@ -69,7 +69,7 @@ docker-cleanup:
 migrations: ## Creates new alembic revision
 	$(DOCKER_COMMAND) exec -T app alembic -c $(ALEMBIC_CONFIG) revision --autogenerate
 
-migrate: ## Creates new alembic revision
+migrate: ## Applies the alembic revisions up to head
 	$(DOCKER_COMMAND) exec -T app alembic -c $(ALEMBIC_CONFIG) upgrade head
 
 bash: ## Open a bash shell in project's main container

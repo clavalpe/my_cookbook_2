@@ -1,5 +1,4 @@
 from collections.abc import Iterator
-from pathlib import Path
 from uuid import UUID
 
 import pytest
@@ -9,12 +8,11 @@ from sqlalchemy import Engine, create_engine, inspect, text
 from sqlalchemy.exc import IntegrityError
 
 from my_cookbook.recipes.infrastructure.postgres_settings import PostgresSettings
-
-ALEMBIC_INI = Path(__file__).parents[5] / "alembic.ini"
+from my_cookbook.recipes.tests.infrastructure.alembic_locations import ALEMBIC_INI
 
 
 class TestRecipesTableMigration:
-    RECIPES_COLUMNS = (
+    RECIPES_COLUMNS: tuple[tuple[str, str, bool], ...] = (
         ("id", "INTEGER", False),
         ("recipe_id", "UUID", False),
         ("name", "TEXT", False),
@@ -35,6 +33,7 @@ class TestRecipesTableMigration:
     def empty_database(self, alembic_config: Config) -> Iterator[None]:
         command.downgrade(alembic_config, "base")
         yield
+        command.downgrade(alembic_config, "base")
         command.upgrade(alembic_config, "head")
 
     def test_creates_the_recipes_table_when_migrating_an_empty_database(
