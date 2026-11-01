@@ -3,12 +3,12 @@
 .DEFAULT_GOAL := help
 
 .PHONY: test linting build
-.PHONY: env-start env-stop env-recreate docker-cleanup migrations migrate bash shell
+.PHONY: env-start env-stop env-recreate docker-cleanup migrations migrate bash shell url
 .PHONY: pr changelog prepare-deploy view-logs help
 
 ROOT_FOLDER := $(shell pwd)
 DOCKER_COMPOSE_FILE := $(ROOT_FOLDER)/docker/docker-compose.yml
-PROJECT_NAME := my-cookbook
+PROJECT_NAME ?= my-cookbook-$(notdir $(ROOT_FOLDER))
 
 DOCKER_COMMAND := docker compose -p $(PROJECT_NAME) -f $(DOCKER_COMPOSE_FILE)
 
@@ -38,7 +38,10 @@ build:
 	$(DOCKER_COMMAND) build --no-cache
 
 env-start:
-	$(DOCKER_COMMAND) up -d
+	$(DOCKER_COMMAND) up -d --build
+
+url: ## Prints the host address where the app of this checkout is published
+	@$(DOCKER_COMMAND) port app 8000
 
 env-stop:
 	$(DOCKER_COMMAND) stop
