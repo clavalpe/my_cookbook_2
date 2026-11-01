@@ -3,7 +3,7 @@
 .DEFAULT_GOAL := help
 
 .PHONY: test linting build
-.PHONY: env-start env-stop env-recreate docker-cleanup migrations migrate bash shell url
+.PHONY: env-start env-stop env-recreate docker-cleanup migrations migrate bash shell url wait-db
 .PHONY: pr changelog prepare-deploy view-logs help
 
 ROOT_FOLDER := $(shell pwd)
@@ -39,6 +39,9 @@ build:
 
 env-start:
 	$(DOCKER_COMMAND) up -d --build
+
+wait-db: ## Blocks until the database accepts connections
+	$(DOCKER_COMMAND) exec -T db sh -c 'until pg_isready; do sleep 1; done'
 
 url: ## Prints the host address where the app of this checkout is published
 	@$(DOCKER_COMMAND) port app 8000
