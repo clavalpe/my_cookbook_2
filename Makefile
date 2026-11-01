@@ -10,6 +10,7 @@ ROOT_FOLDER := $(shell pwd)
 DOCKER_COMPOSE_FILE := $(ROOT_FOLDER)/docker/docker-compose.yml
 PROJECT_NAME ?= my-cookbook-$(notdir $(ROOT_FOLDER))
 
+ALEMBIC_CONFIG := /app/alembic.ini
 DOCKER_COMMAND := docker compose -p $(PROJECT_NAME) -f $(DOCKER_COMPOSE_FILE)
 
 test:
@@ -66,10 +67,10 @@ docker-cleanup:
 	docker system prune -f
 
 migrations: ## Creates new alembic revision
-	$(DOCKER_COMMAND) exec app alembic revision --autogenerate
+	$(DOCKER_COMMAND) exec -T app alembic -c $(ALEMBIC_CONFIG) revision --autogenerate
 
 migrate: ## Creates new alembic revision
-	$(DOCKER_COMMAND) exec app alembic upgrade head
+	$(DOCKER_COMMAND) exec -T app alembic -c $(ALEMBIC_CONFIG) upgrade head
 
 bash: ## Open a bash shell in project's main container
 	$(DOCKER_COMMAND) exec app bash
