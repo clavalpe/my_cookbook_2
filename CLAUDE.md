@@ -37,7 +37,6 @@ Code and documentation are written in English.
 
 It predates the conventions. Do not imitate it when writing new code:
 
-- `main.py` at the root: leftover of the initial "Hello World", duplicates `src/app.py`.
 - `Recipe` and `CreateRecipe`: they do not yet fully follow `docs/conventions/domain.md` (the recipe has no
   id) nor `docs/conventions/application.md` (the name of the `execute` parameter). They are migrated when
   touched.
