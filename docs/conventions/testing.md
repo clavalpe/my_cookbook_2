@@ -16,6 +16,10 @@ passes or fails depending on what you have installed, and that is not a yardstic
 - **Zero prose**: no comments and no docstrings. The test name is the sentence.
 - The name says **what is guaranteed and why**, not which method is called:
   `test_does_not_allow_to_create_a_recipe_with_a_short_name`.
+- **The name is written in business terms**, as `docs/conventions/code-style.md` requires of every name. It
+  does not mention doubles, ports, DTOs, sessions or calls: `test_creates_a_recipe_with_the_requested_name_and_description`,
+  not `test_hands_the_repository_a_recipe_with_the_name_and_description_of_the_dto`. If the name only makes
+  sense to someone who has read the code, rewrite it as what the business would observe.
 - A test's helpers are `@staticmethod`s of its test class or live in a shared module, never loose at module
   level. Fixtures go inside the class.
 - Arrange / act / assert structure, separated by a blank line.
@@ -48,6 +52,8 @@ not a `create(...)` with everything defaulted.
 - **`create_autospec(X, spec_set=True, instance=True)`** for stateless ports.
 - **Hand-written stateful doubles** when the test needs to ask what it was handed.
 - **A double doubles what its name says and nothing else.**
+- **A double is named as a double**: `mock_` for an autospec double (`mock_recipe_repository`), `fake_` for a
+  hand-written one. Business naming applies to everything else in the test, but a double must read as one.
 - **Never mock value objects**: use real instances.
 - The arrange **is not built with the piece under test**.
 
@@ -61,6 +67,7 @@ not a `create(...)` with everything defaulted.
 
 - A test as a loose function.
 - A comment or a docstring in a test.
+- A test name that describes the mechanism (doubles, ports, DTOs, calls) instead of what the business observes.
 - A domain test that only exercises a dataclass.
 - Building a domain object by hand in the test when there is a mother.
 - A loose module-level test helper, or one repeated in two files.

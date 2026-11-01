@@ -23,9 +23,29 @@ always a named method waiting to be born.
 
 The *why* goes to the durable record: the pull request body and `docs/`.
 
+## Names speak the business
+
+Every name -variables, parameters, attributes, methods, constants and tests- is written in the terms of
+the recipe book, not in the terms of how the code works. A reader who knows the business and has never seen
+the code must understand it.
+
+- Name a thing for **what it is for the business**: `requested_name`, `saved_recipe`, `short_name`; not for
+  its mechanism: `dto_name`, `call_args`, `data`, `tmp`, `obj`.
+- Name an action for **what happens to the recipe**: `save`, `reject`, `keep`; not for how: `hand`, `pass`,
+  `forward`, `invoke`.
+- Names that the architecture already fixes for a layer stay as they are (`RecipeRepository`,
+  `CreateRecipeDTO`, `execute`). The rule applies to everything the author chooses.
+- **A test double is named as a double**, so the reader sees which collaborators are not real: the `mock_`
+  prefix for an autospec double (`mock_recipe_repository`) and `fake_` for a hand-written one. The rest of the
+  name stays in business terms. This is the only place where a mechanism word belongs in a name.
+- A generic container name (`data`, `result`, `item`, `value`, `info`) is allowed only when the business has
+  no better word for it.
+
 ## Anti-patterns
 
 - A comment or docstring explaining code that could be renamed. Rewrite the code.
 - An import inside a function or method.
 - An identifier in Spanish that is not contract data.
+- A name that describes the mechanism instead of the business: `dto_name`, `call_args`, `tmp`.
+- A test double whose name hides that it is a double: `recipe_repository` for an autospec double.
 - A redundant condition: if `len(value) < 5` already covers the empty string, `value == ""` is superfluous.

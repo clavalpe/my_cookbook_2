@@ -6,7 +6,8 @@ The use cases. They orchestrate; the logic lives in the domain and input/output 
 
 - One module per use case, in `application/`, named after the use case in snake_case.
 - The class has **no suffix**: `CreateRecipe`, not `CreateRecipeUseCase` or `CreateRecipeService`.
-- Main method `execute(dto: <Name>DTO) -> <Result>`.
+- Main method `execute(<business name>: <Name>DTO) -> <Result>`. The type is a `DTO`, the parameter is named
+  for what it is for the business (`requested_recipe`), never `dto`.
 - `<Name>DTO` -and `<Name>Result` if it returns data- are frozen dataclasses **in the same module**.
 - Dependencies come in through the constructor and are ports, never adapters.
 
@@ -16,7 +17,7 @@ class {DoSomething}:
     def __init__(self, {port}: {Port}) -> None:
         self._{port} = {port}
 
-    def execute(self, dto: {DoSomething}DTO) -> {Result}: ...
+    def execute(self, {requested_thing}: {DoSomething}DTO) -> {Result}: ...
 ```
 
 ## What it does
