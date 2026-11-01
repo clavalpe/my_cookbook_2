@@ -1,7 +1,6 @@
 from collections.abc import Iterator
 from typing import Annotated
 from unittest.mock import MagicMock, create_autospec
-from uuid import UUID
 
 import pytest
 from fastapi import Depends
@@ -23,14 +22,14 @@ class TestCreateRecipeEndpoint:
 
     @pytest.fixture
     def mock_session(self) -> MagicMock:
-        session: MagicMock = create_autospec(Session, spec_set=True, instance=True)
-        return session
+        mock_session: MagicMock = create_autospec(Session, spec_set=True, instance=True)
+        return mock_session
 
     @pytest.fixture
     def client(
         self, fake_recipe_repository: FakeRecipeRepository, mock_session: MagicMock
     ) -> Iterator[TestClient]:
-        def provide_session_factory() -> MagicMock:
+        def provide_mock_session_factory() -> MagicMock:
             return MagicMock(return_value=mock_session)
 
         def provide_fake_recipe_repository(
@@ -38,7 +37,7 @@ class TestCreateRecipeEndpoint:
         ) -> RecipeRepository:
             return fake_recipe_repository
 
-        app.dependency_overrides[get_session_factory] = provide_session_factory
+        app.dependency_overrides[get_session_factory] = provide_mock_session_factory
         app.dependency_overrides[get_recipe_repository] = provide_fake_recipe_repository
         yield TestClient(app, raise_server_exceptions=False)
         app.dependency_overrides.clear()
@@ -51,9 +50,8 @@ class TestCreateRecipeEndpoint:
         )
 
         assert response.status_code == 201
-        assert list(response.json()) == ["id"]
         [saved_recipe] = fake_recipe_repository.saved_recipes
-        assert saved_recipe.id.value == UUID(response.json()["id"])
+        assert response.json() == {"id": str(saved_recipe.id.value)}
         assert saved_recipe.name == RecipeName("Omelette")
         assert saved_recipe.description == "Eggs"
 
@@ -75,8 +73,11 @@ class TestCreateRecipeEndpoint:
     def test_keeps_the_created_recipe_once_the_request_succeeds(
         self, client: TestClient, mock_session: MagicMock
     ) -> None:
-        client.post("/recipes/", json={"name": "Omelette", "description": "Eggs"})
+        response = client.post(
+            "/recipes/", json={"name": "Omelette", "description": "Eggs"}
+        )
 
+        assert response.status_code == 201
         mock_session.commit.assert_called_once_with()
         mock_session.rollback.assert_not_called()
         mock_session.close.assert_called_once_with()
